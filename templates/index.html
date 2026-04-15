@@ -1,274 +1,820 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Intrusion Detection System</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0a0a1a;
+            font-family: 'Rajdhani', sans-serif;
+            background: #020818;
             color: #fff;
             min-height: 100vh;
+            overflow-x: hidden;
         }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 20px 40px;
-            border-bottom: 2px solid #00ff88;
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, rgba(0,255,136,0.05), rgba(0,100,255,0.05));
+            border-bottom: 1px solid rgba(0,255,136,0.2);
+            padding: 15px 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            backdrop-filter: blur(10px);
         }
-        .header h1 { color: #00ff88; font-size: 24px; }
-        .header p { color: #888; font-size: 13px; }
-        .status-bar {
-            background: #111;
-            padding: 10px 40px;
+
+        .logo {
             display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 50px; height: 50px;
+            border: 2px solid #00ff88;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,255,136,0.8); }
+        }
+
+        .logo-text h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            color: #00ff88;
+            letter-spacing: 2px;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #888;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
             gap: 30px;
-            border-bottom: 1px solid #222;
         }
-        .status-item { font-size: 13px; color: #aaa; }
-        .status-item span { color: #00ff88; font-weight: bold; }
-        .container { padding: 30px 40px; display: grid;
-            grid-template-columns: 1fr 1fr; gap: 30px; }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .accuracy-badge {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #00ff88;
+            font-family: 'Orbitron', monospace;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-item {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .stat-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .stat-number.threat { color: #ff4444; }
+        .stat-number.warning { color: #ffaa00; }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        /* Main layout */
+        .main {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1fr 1fr 380px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 140px);
+        }
+
         .card {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 12px;
-            padding: 25px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
         }
-        .card h2 { color: #00ff88; margin-bottom: 20px;
-            font-size: 16px; text-transform: uppercase;
-            letter-spacing: 1px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; color: #aaa;
-            font-size: 13px; margin-bottom: 5px; }
-        .form-group select, .form-group input {
-            width: 100%; padding: 10px;
-            background: #1f2937; border: 1px solid #374151;
-            border-radius: 8px; color: #fff; font-size: 14px;
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            color: #00ff88;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .btn {
-            width: 100%; padding: 12px;
-            border: none; border-radius: 8px;
-            font-size: 15px; font-weight: bold;
-            cursor: pointer; margin-top: 10px;
+
+        .card-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0,255,136,0.3), transparent);
+        }
+
+        /* Form styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Rajdhani', sans-serif;
             transition: all 0.3s;
         }
-        .btn-primary { background: #00ff88; color: #000; }
-        .btn-primary:hover { background: #00cc6a; }
-        .btn-simulate { background: #3b82f6; color: #fff; }
-        .btn-simulate:hover { background: #2563eb; }
-        .alert-box {
-            border-radius: 10px; padding: 20px;
-            margin-bottom: 15px; border-left: 4px solid;
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: rgba(0,255,136,0.5);
+            box-shadow: 0 0 15px rgba(0,255,136,0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Rajdhani', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,255,136,0.3);
+        }
+
+        .btn-simulate {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: #fff;
+        }
+
+        .btn-simulate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59,130,246,0.3);
+        }
+
+        /* Alert result */
+        .result-box {
+            border-radius: 12px;
+            padding: 20px;
             display: none;
+            border: 1px solid;
+            animation: fadeIn 0.5s ease;
         }
-        .alert-threat {
-            background: #1a0a0a; border-color: #ff4444;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .alert-normal {
-            background: #0a1a0a; border-color: #00ff88;
+
+        .result-threat {
+            background: rgba(255,68,68,0.05);
+            border-color: rgba(255,68,68,0.3);
         }
-        .alert-title { font-size: 18px; font-weight: bold;
-            margin-bottom: 10px; }
-        .alert-detail { color: #aaa; font-size: 13px;
-            line-height: 1.6; }
+
+        .result-normal {
+            background: rgba(0,255,136,0.05);
+            border-color: rgba(0,255,136,0.3);
+        }
+
+        .result-status {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
         .badge {
-            display: inline-block; padding: 4px 12px;
-            border-radius: 20px; font-size: 12px;
-            font-weight: bold; margin: 5px 3px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        .badge-critical { background: #ff4444; color: #fff; }
-        .badge-high { background: #ff8800; color: #fff; }
-        .badge-normal { background: #00ff88; color: #000; }
+
+        .badge-red { background: rgba(255,68,68,0.2); color: #ff4444; border: 1px solid rgba(255,68,68,0.3); }
+        .badge-green { background: rgba(0,255,136,0.2); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); }
+        .badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+
+        .result-details {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .result-recommend {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            color: #93c5fd;
+        }
+
+        .placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: #333;
+            font-size: 14px;
+            gap: 10px;
+        }
+
+        .placeholder-icon { font-size: 40px; }
+
+        /* Alert history */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
         .history-item {
-            padding: 12px; background: #1f2937;
-            border-radius: 8px; margin-bottom: 10px;
-            display: flex; justify-content: space-between;
-            align-items: center; font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 3px solid;
+            font-size: 13px;
+            transition: all 0.2s;
         }
-        .full-width { grid-column: 1 / -1; }
-        .loading { display: none; text-align: center;
-            color: #00ff88; padding: 20px; }
-        .recommend-box {
-            background: #1f2937; border-radius: 8px;
-            padding: 15px; margin-top: 15px;
-            border-left: 3px solid #3b82f6;
-            color: #93c5fd; font-size: 13px;
+
+        .history-item:hover {
+            background: rgba(255,255,255,0.06);
+        }
+
+        .history-threat { border-color: #ff4444; }
+        .history-normal { border-color: #00ff88; }
+
+        /* Chatbot */
+        .chat-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 5px;
+            margin-bottom: 15px;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
+
+        .msg {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .msg-bot {
+            background: rgba(0,255,136,0.08);
+            border: 1px solid rgba(0,255,136,0.15);
+            color: #ccc;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-user {
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.2);
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-label {
+            font-size: 10px;
+            color: #555;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: rgba(0,255,136,0.4);
+        }
+
+        .chat-send {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,255,136,0.3);
+        }
+
+        .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .quick-btn {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            color: #aaa;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .quick-btn:hover {
+            background: rgba(0,255,136,0.1);
+            border-color: rgba(0,255,136,0.3);
+            color: #00ff88;
+        }
+
+        .loading-dots {
+            display: none;
+            align-self: flex-start;
+        }
+
+        .loading-dots span {
+            display: inline-block;
+            width: 8px; height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1s infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Scrollbar */
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-track { background: transparent; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(0,255,136,0.3); border-radius: 2px; }
+
+        /* Scanning animation */
+        .scanning {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #00ff88;
+        }
+
+        .scan-ring {
+            width: 60px; height: 60px;
+            border: 3px solid rgba(0,255,136,0.2);
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
-    <div>
-        <h1>🛡️ AI Network Intrusion Detection System</h1>
-        <p>Real-time threat detection powered by Machine Learning & NLP</p>
+    <div class="logo">
+        <div class="logo-icon">🛡️</div>
+        <div class="logo-text">
+            <h1>CYBERGUARD AI</h1>
+            <p>Network Intrusion Detection System</p>
+        </div>
     </div>
-    <div style="text-align:right; color:#00ff88; font-size:13px;">
-        <div>🟢 System Online</div>
-        <div style="color:#888">Model Accuracy: 99.78%</div>
+    <div class="header-right">
+        <div class="status-indicator">
+            <div class="dot"></div>
+            <span style="color:#00ff88">System Online</span>
+        </div>
+        <div class="accuracy-badge">99.78% Accuracy</div>
     </div>
 </div>
 
-<div class="status-bar">
-    <div class="status-item">🧠 AI Model: <span>Random Forest</span></div>
-    <div class="status-item">📊 Dataset: <span>NSL-KDD</span></div>
-    <div class="status-item">🌐 Protocol Support: <span>TCP / UDP / ICMP</span></div>
-    <div class="status-item">⚡ Status: <span>Monitoring</span></div>
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-number" id="totalScans">0</div>
+        <div class="stat-label">Total Scans</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number threat" id="threatsFound">0</div>
+        <div class="stat-label">Threats Detected</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number" id="safeTraffic">0</div>
+        <div class="stat-label">Safe Traffic</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-number warning" id="accuracy">99.78%</div>
+        <div class="stat-label">Model Accuracy</div>
+    </div>
 </div>
 
-<div class="container">
+<!-- Main Content -->
+<div class="main">
 
-    <!-- Input Form -->
-    <div class="card">
-        <h2>🔍 Analyze Network Traffic</h2>
-        <div class="form-group">
-            <label>Protocol Type</label>
-            <select id="protocol">
-                <option value="tcp">TCP</option>
-                <option value="udp">UDP</option>
-                <option value="icmp">ICMP</option>
-            </select>
+    <!-- Left: Input + Result -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+
+        <!-- Input Form -->
+        <div class="card">
+            <div class="card-title">🔍 Analyze Traffic</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Protocol</label>
+                    <select id="protocol">
+                        <option value="tcp">TCP</option>
+                        <option value="udp">UDP</option>
+                        <option value="icmp">ICMP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Service</label>
+                    <select id="service">
+                        <option value="http">HTTP</option>
+                        <option value="ftp">FTP</option>
+                        <option value="ssh">SSH</option>
+                        <option value="smtp">SMTP</option>
+                        <option value="dns">DNS</option>
+                        <option value="telnet">Telnet</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Source Bytes</label>
+                    <input type="number" id="src_bytes" value="1000" min="0"/>
+                </div>
+                <div class="form-group">
+                    <label>Dest Bytes</label>
+                    <input type="number" id="dst_bytes" value="5000" min="0"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Duration (seconds)</label>
+                <input type="number" id="duration" value="5" min="0"/>
+            </div>
+            <button class="btn btn-primary" onclick="analyzeTraffic()">
+                ⚡ Analyze Traffic
+            </button>
+            <button class="btn btn-simulate" onclick="simulateIoT()">
+                📡 Simulate IoT Device
+            </button>
         </div>
-        <div class="form-group">
-            <label>Service</label>
-            <select id="service">
-                <option value="http">HTTP</option>
-                <option value="ftp">FTP</option>
-                <option value="ssh">SSH</option>
-                <option value="smtp">SMTP</option>
-                <option value="dns">DNS</option>
-                <option value="telnet">Telnet</option>
-                <option value="other">Other</option>
-            </select>
+
+        <!-- Result -->
+        <div class="card" style="flex:1">
+            <div class="card-title">⚠️ Detection Result</div>
+            <div class="scanning" id="scanning">
+                <div class="scan-ring"></div>
+                Analyzing network traffic...
+            </div>
+            <div id="resultBox" class="result-box">
+                <div class="result-status" id="resultStatus"></div>
+                <div class="badges" id="resultBadges"></div>
+                <div class="result-details" id="resultDetails"></div>
+                <div class="result-recommend" id="resultRecommend"></div>
+            </div>
+            <div class="placeholder" id="placeholder">
+                <div class="placeholder-icon">🔒</div>
+                <div>Submit traffic data to begin analysis</div>
+            </div>
         </div>
-        <div class="form-group">
-            <label>Source Bytes</label>
-            <input type="number" id="src_bytes" value="1000" min="0"/>
-        </div>
-        <div class="form-group">
-            <label>Destination Bytes</label>
-            <input type="number" id="dst_bytes" value="5000" min="0"/>
-        </div>
-        <div class="form-group">
-            <label>Duration (seconds)</label>
-            <input type="number" id="duration" value="5" min="0"/>
-        </div>
-        <button class="btn btn-primary" onclick="analyzeTraffic()">
-            🔍 Analyze Traffic
-        </button>
-        <button class="btn btn-simulate" onclick="simulateIoT()">
-            📡 Simulate IoT Device
-        </button>
     </div>
 
-    <!-- Alert Result -->
+    <!-- Middle: Alert History -->
     <div class="card">
-        <h2>⚠️ Detection Result</h2>
-        <div class="loading" id="loading">🔄 Analyzing traffic...</div>
-        <div class="alert-box" id="alertBox">
-            <div class="alert-title" id="alertStatus"></div>
-            <div style="margin-bottom:10px">
-                <span class="badge" id="alertSeverity"></span>
-                <span class="badge" id="alertConfidence"
-                    style="background:#374151;color:#fff"></span>
+        <div class="card-title">📋 Alert History</div>
+        <div class="history-list" id="historyList">
+            <div style="color:#333; text-align:center; padding:40px; font-size:14px;">
+                No alerts recorded yet
             </div>
-            <div class="alert-detail" id="alertDetails"></div>
-            <div class="recommend-box" id="alertRecommend"></div>
-        </div>
-        <div id="placeholder" style="color:#555; text-align:center;
-            padding:40px; font-size:14px;">
-            Submit network data to see detection results
         </div>
     </div>
 
-    <!-- Alert History -->
-    <div class="card full-width">
-        <h2>📋 Recent Alert History</h2>
-        <div id="alertHistory">
-            <div style="color:#555; text-align:center; padding:20px;
-                font-size:14px;">
-                No alerts yet — analyze some traffic!
+    <!-- Right: Chatbot -->
+    <div class="card chat-panel">
+        <div class="card-title">🤖 CyberBot AI</div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div>
+                <div class="msg-label">CyberBot</div>
+                <div class="msg msg-bot">
+                    👋 Hello! I'm CyberBot, your AI security assistant.<br><br>
+                    Ask me anything about network security, threats, or system status!
+                </div>
             </div>
+        </div>
+
+        <div class="loading-dots" id="loadingDots">
+            <span></span><span></span><span></span>
+        </div>
+
+        <div class="quick-btns">
+            <button class="quick-btn" onclick="quickAsk('Is my network safe?')">Network status</button>
+            <button class="quick-btn" onclick="quickAsk('What is DDoS?')">What is DDoS?</button>
+            <button class="quick-btn" onclick="quickAsk('Show latest alert')">Latest alert</button>
+            <button class="quick-btn" onclick="quickAsk('Give me security tips')">Security tips</button>
+            <button class="quick-btn" onclick="quickAsk('How many threats?')">Threat count</button>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput"
+                placeholder="Ask about security..."
+                onkeypress="if(event.key==='Enter') sendMessage()"/>
+            <button class="chat-send" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
 </div>
 
 <script>
+    let totalScans = 0, threatsFound = 0, safeTraffic = 0;
+
+    function updateStats(isAttack) {
+        totalScans++;
+        if (isAttack) threatsFound++;
+        else safeTraffic++;
+        document.getElementById('totalScans').textContent = totalScans;
+        document.getElementById('threatsFound').textContent = threatsFound;
+        document.getElementById('safeTraffic').textContent = safeTraffic;
+    }
+
     async function analyzeTraffic() {
         const data = {
             protocol_type: document.getElementById('protocol').value,
             service: document.getElementById('service').value,
-            src_bytes: parseInt(document.getElementById('src_bytes').value),
-            dst_bytes: parseInt(document.getElementById('dst_bytes').value),
-            duration: parseInt(document.getElementById('duration').value),
+            src_bytes: parseInt(document.getElementById('src_bytes').value) || 0,
+            dst_bytes: parseInt(document.getElementById('dst_bytes').value) || 0,
+            duration: parseInt(document.getElementById('duration').value) || 0,
             flag: 'SF', count: 10, srv_count: 10,
             dst_host_count: 50, dst_host_srv_count: 50
         };
-        showLoading();
+        showScanning();
         const response = await fetch('/analyze', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         });
         const alert = await response.json();
-        displayAlert(alert);
+        displayResult(alert);
     }
 
     async function simulateIoT() {
-        showLoading();
+        showScanning();
         const response = await fetch('/simulate');
         const alert = await response.json();
-        displayAlert(alert);
+        displayResult(alert);
     }
 
-    function showLoading() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('alertBox').style.display = 'none';
+    function showScanning() {
+        document.getElementById('scanning').style.display = 'block';
+        document.getElementById('resultBox').style.display = 'none';
         document.getElementById('placeholder').style.display = 'none';
     }
 
-    function displayAlert(alert) {
-        document.getElementById('loading').style.display = 'none';
-        const box = document.getElementById('alertBox');
+    function displayResult(alert) {
+        document.getElementById('scanning').style.display = 'none';
+        const box = document.getElementById('resultBox');
         box.style.display = 'block';
         const isAttack = alert.status.includes('THREAT');
-        box.className = 'alert-box ' +
-            (isAttack ? 'alert-threat' : 'alert-normal');
-        document.getElementById('alertStatus').textContent = alert.status;
-        document.getElementById('alertDetails').textContent = alert.details;
-        document.getElementById('alertRecommend').textContent =
-            '➡️ ' + alert.recommendation;
-        const sev = document.getElementById('alertSeverity');
-        sev.textContent = alert.severity;
-        sev.className = 'badge ' +
-            (isAttack ? 'badge-critical' : 'badge-normal');
-        document.getElementById('alertConfidence').textContent =
-            '🎯 Confidence: ' + alert.confidence;
-        updateHistory(alert);
+        box.className = 'result-box ' + (isAttack ? 'result-threat' : 'result-normal');
+        document.getElementById('resultStatus').textContent = alert.status;
+        document.getElementById('resultDetails').textContent = alert.details;
+        document.getElementById('resultRecommend').textContent = '➡️ ' + alert.recommendation;
+        const badges = document.getElementById('resultBadges');
+        badges.innerHTML = `
+            <span class="badge ${isAttack ? 'badge-red' : 'badge-green'}">${alert.severity}</span>
+            <span class="badge badge-blue">🎯 ${alert.confidence}</span>
+            <span class="badge badge-blue">${alert.type}</span>
+        `;
+        updateStats(isAttack);
+        addToHistory(alert, isAttack);
     }
 
-    function updateHistory(alert) {
-        const history = document.getElementById('alertHistory');
-        const isAttack = alert.status.includes('THREAT');
+    function addToHistory(alert, isAttack) {
+        const list = document.getElementById('historyList');
+        if (list.querySelector('div[style]')) list.innerHTML = '';
         const item = document.createElement('div');
-        item.className = 'history-item';
+        item.className = 'history-item ' + (isAttack ? 'history-threat' : 'history-normal');
         item.innerHTML = `
-            <span>${alert.status}</span>
-            <span style="color:#aaa">${alert.type}</span>
-            <span class="badge ${isAttack ?
-                'badge-critical' : 'badge-normal'}">
-                ${alert.severity}</span>
-            <span style="color:#888;font-size:12px">
-                ${new Date().toLocaleTimeString()}</span>
+            <span style="font-size:16px">${isAttack ? '🔴' : '🟢'}</span>
+            <span style="flex:1; margin:0 10px; color:${isAttack ? '#ff8888' : '#88ffbb'}">${alert.type}</span>
+            <span style="color:#555; font-size:11px">${new Date().toLocaleTimeString()}</span>
         `;
-        if (history.querySelector('div[style]')) history.innerHTML = '';
-        history.insertBefore(item, history.firstChild);
+        list.insertBefore(item, list.firstChild);
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        appendMessage(msg, 'user');
+        document.getElementById('loadingDots').style.display = 'block';
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: msg})
+        });
+        const data = await response.json();
+        document.getElementById('loadingDots').style.display = 'none';
+        appendMessage(data.response, 'bot');
+    }
+
+    function quickAsk(msg) {
+        document.getElementById('chatInput').value = msg;
+        sendMessage();
+    }
+
+    function appendMessage(text, sender) {
+        const messages = document.getElementById('chatMessages');
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        const label = document.createElement('div');
+        label.className = 'msg-label';
+        label.textContent = sender === 'bot' ? 'CyberBot' : 'You';
+        label.style.textAlign = sender === 'user' ? 'right' : 'left';
+        const bubble = document.createElement('div');
+        bubble.className = `msg msg-${sender}`;
+        bubble.style.whiteSpace = 'pre-line';
+        bubble.textContent = text;
+        wrapper.appendChild(label);
+        wrapper.appendChild(bubble);
+        messages.appendChild(wrapper);
+        messages.scrollTop = messages.scrollHeight;
     }
 </script>
 </body>
