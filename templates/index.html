@@ -9,15 +9,15 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Light theme (default) */
+        /* Light Theme (default) - Exact specs */
         :root {
             --bg-body: #CDD7D6;
             --card-bg: #ffffff;
             --text-primary: #102542;
             --text-secondary: #4a5b6e;
-            --border-light: #bcc5c4;
+            --border-light: #b8c3c2;
             --primary: #F87060;
-            --primary-light: #ffe1dd;
+            --primary-light: #ffe0db;
             --primary-dark: #e05a4a;
             --danger: #dc2626;
             --danger-light: #fee2e2;
@@ -30,26 +30,28 @@
             --shadow-lg: 0 10px 18px rgba(0,0,0,0.08);
             --input-bg: white;
             --chat-user-bg: #F87060;
-            --chat-bot-bg: #F0F3F2;
-            --hover-overlay: rgba(0,0,0,0.02);
+            --chat-bot-bg: #eef2f1;
+            --icon-filter: none;
         }
 
-        /* Dark theme overrides */
+        /* Dark Theme - Exact specs: text #CDD7D6, icons #F87060, background #102542 */
         body.dark {
             --bg-body: #102542;
-            --card-bg: #1e2f3f;
-            --text-primary: #eef4ff;
-            --text-secondary: #b0c4de;
-            --border-light: #2a3c4e;
+            --card-bg: #1a2d42;
+            --text-primary: #CDD7D6;
+            --text-secondary: #a8b9c4;
+            --border-light: #2a4058;
+            --primary: #F87060;
             --primary-light: #3d2a27;
+            --primary-dark: #ff8a7a;
             --danger-light: #3b1e1e;
             --success-light: #1a3a2a;
             --warning-light: #3a2e1c;
-            --input-bg: #2a3c4e;
-            --chat-bot-bg: #2a3c4e;
+            --input-bg: #1e3448;
+            --chat-bot-bg: #1e3448;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --shadow-md: 0 4px 8px rgba(0,0,0,0.4);
-            --hover-overlay: rgba(255,255,255,0.05);
+            --icon-filter: brightness(0) saturate(100%) invert(74%) sepia(22%) saturate(430%) hue-rotate(136deg) brightness(92%) contrast(87%);
         }
 
         body {
@@ -112,12 +114,12 @@
             gap: 12px;
         }
 
-        /* Theme toggle button */
+        /* Theme toggle button - styled with icon color #F87060 */
         .theme-toggle {
             background: var(--primary-light);
             border: 1px solid var(--border-light);
             border-radius: 40px;
-            padding: 6px 12px;
+            padding: 6px 14px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
@@ -201,12 +203,9 @@
             justify-content: center;
             font-size: 20px;
             flex-shrink: 0;
+            background: var(--primary-light);
+            color: var(--primary);
         }
-
-        .stat-icon.blue { background: var(--primary-light); color: var(--primary); }
-        .stat-icon.red { background: var(--danger-light); color: var(--danger); }
-        .stat-icon.green { background: var(--success-light); color: var(--success); }
-        .stat-icon.yellow { background: var(--warning-light); color: var(--warning); }
 
         .stat-number {
             font-family: 'Space Grotesk', sans-serif;
@@ -380,6 +379,7 @@
             font-size: 17px;
             font-weight: 700;
             margin-bottom: 12px;
+            color: var(--text-primary);
         }
 
         .badges {
@@ -414,7 +414,7 @@
             border-radius: 8px;
             padding: 12px;
             font-size: 13px;
-            color: var(--primary-dark);
+            color: var(--primary);
             font-weight: 500;
         }
 
@@ -689,28 +689,28 @@
 <!-- Stats Bar -->
 <div class="stats-bar">
     <div class="stat-card">
-        <div class="stat-icon blue">🔍</div>
+        <div class="stat-icon">🔍</div>
         <div class="stat-info">
             <div class="stat-number" id="totalScans">0</div>
             <div class="stat-label">Total Scans</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon red">⚠️</div>
+        <div class="stat-icon">⚠️</div>
         <div class="stat-info">
             <div class="stat-number" id="threatsFound">0</div>
             <div class="stat-label">Threats Found</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green">✅</div>
+        <div class="stat-icon">✅</div>
         <div class="stat-info">
             <div class="stat-number" id="safeTraffic">0</div>
             <div class="stat-label">Safe Traffic</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon yellow">🧠</div>
+        <div class="stat-icon">🧠</div>
         <div class="stat-info">
             <div class="stat-number">RF</div>
             <div class="stat-label">AI Model</div>
@@ -836,7 +836,7 @@
 <script>
     let totalScans = 0, threatsFound = 0, safeTraffic = 0;
 
-    // --- Dark/Light Mode Toggle ---
+    // --- Dark/Light Mode Toggle with exact color specs ---
     const themeToggle = document.getElementById('themeToggleBtn');
     function setTheme(theme) {
         if (theme === 'dark') {
@@ -864,22 +864,21 @@
         document.getElementById('safeTraffic').textContent = safeTraffic;
     }
 
-    // Enhanced detection engine with confidence scoring & attack logic
+    // Enhanced detection engine with realistic rules
     function getDetectionResult(data) {
         const { protocol_type, service, src_bytes, dst_bytes, duration } = data;
         let attackScore = 0;
         let type = "Normal", severity = "Low", details = "", recommendation = "";
 
-        // Heuristic rules + random factor for realism, but deterministic based on inputs
+        // Threat detection logic
         if ((protocol_type === 'icmp' && duration > 2 && src_bytes > 500)) attackScore += 40;
-        if (service === 'telnet') attackScore += 35;
+        if (service === 'telnet') attackScore += 38;
         if (src_bytes > 8000 || dst_bytes > 20000) attackScore += 30;
         if (duration === 0 && src_bytes > 3000) attackScore += 25;
         if (protocol_type === 'udp' && service === 'dns' && src_bytes > 4000) attackScore += 35;
         if (service === 'ftp' && src_bytes > 10000) attackScore += 30;
         if (duration < 1 && src_bytes > 5000) attackScore += 20;
         
-        // randomize within bound but consistent (using seeded pseudo)
         let randomFactor = (src_bytes % 7) + (dst_bytes % 5);
         attackScore = Math.min(100, attackScore + (randomFactor % 20));
         
@@ -922,7 +921,6 @@
             duration: parseInt(document.getElementById('duration').value) || 0,
         };
         showScanning();
-        // simulate network delay for realism
         await new Promise(r => setTimeout(r, 500));
         const alertObj = getDetectionResult(data);
         displayResult(alertObj);
@@ -941,7 +939,6 @@
             duration: Math.floor(Math.random() * 25),
         };
         const alertObj = getDetectionResult(iotData);
-        // also update form fields with simulation values for user visibility
         document.getElementById('protocol').value = iotData.protocol_type;
         document.getElementById('service').value = iotData.service;
         document.getElementById('src_bytes').value = iotData.src_bytes;
@@ -990,7 +987,7 @@
         list.insertBefore(item, list.firstChild);
     }
 
-    // Intelligent Chatbot responses
+    // Intelligent Chatbot with context-aware replies
     async function sendMessage() {
         const input = document.getElementById('chatInput');
         const msg = input.value.trim();
@@ -998,6 +995,8 @@
         input.value = '';
         appendMessage(msg, 'user');
         document.getElementById('loadingDots').style.display = 'block';
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 500));
         let reply = "";
-        const lower =
+        const lowerMsg = msg.toLowerCase();
+        if (lowerMsg.includes('network safe') || lowerMsg.includes('status')) {
+            reply = `🛡️ Current network status: ${totalScans} total scans, ${threat
