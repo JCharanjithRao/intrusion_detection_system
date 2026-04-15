@@ -1,0 +1,275 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Intrusion Detection System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px 40px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 { color: #00ff88; font-size: 24px; }
+        .header p { color: #888; font-size: 13px; }
+        .status-bar {
+            background: #111;
+            padding: 10px 40px;
+            display: flex;
+            gap: 30px;
+            border-bottom: 1px solid #222;
+        }
+        .status-item { font-size: 13px; color: #aaa; }
+        .status-item span { color: #00ff88; font-weight: bold; }
+        .container { padding: 30px 40px; display: grid;
+            grid-template-columns: 1fr 1fr; gap: 30px; }
+        .card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 25px;
+        }
+        .card h2 { color: #00ff88; margin-bottom: 20px;
+            font-size: 16px; text-transform: uppercase;
+            letter-spacing: 1px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; color: #aaa;
+            font-size: 13px; margin-bottom: 5px; }
+        .form-group select, .form-group input {
+            width: 100%; padding: 10px;
+            background: #1f2937; border: 1px solid #374151;
+            border-radius: 8px; color: #fff; font-size: 14px;
+        }
+        .btn {
+            width: 100%; padding: 12px;
+            border: none; border-radius: 8px;
+            font-size: 15px; font-weight: bold;
+            cursor: pointer; margin-top: 10px;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #00ff88; color: #000; }
+        .btn-primary:hover { background: #00cc6a; }
+        .btn-simulate { background: #3b82f6; color: #fff; }
+        .btn-simulate:hover { background: #2563eb; }
+        .alert-box {
+            border-radius: 10px; padding: 20px;
+            margin-bottom: 15px; border-left: 4px solid;
+            display: none;
+        }
+        .alert-threat {
+            background: #1a0a0a; border-color: #ff4444;
+        }
+        .alert-normal {
+            background: #0a1a0a; border-color: #00ff88;
+        }
+        .alert-title { font-size: 18px; font-weight: bold;
+            margin-bottom: 10px; }
+        .alert-detail { color: #aaa; font-size: 13px;
+            line-height: 1.6; }
+        .badge {
+            display: inline-block; padding: 4px 12px;
+            border-radius: 20px; font-size: 12px;
+            font-weight: bold; margin: 5px 3px;
+        }
+        .badge-critical { background: #ff4444; color: #fff; }
+        .badge-high { background: #ff8800; color: #fff; }
+        .badge-normal { background: #00ff88; color: #000; }
+        .history-item {
+            padding: 12px; background: #1f2937;
+            border-radius: 8px; margin-bottom: 10px;
+            display: flex; justify-content: space-between;
+            align-items: center; font-size: 13px;
+        }
+        .full-width { grid-column: 1 / -1; }
+        .loading { display: none; text-align: center;
+            color: #00ff88; padding: 20px; }
+        .recommend-box {
+            background: #1f2937; border-radius: 8px;
+            padding: 15px; margin-top: 15px;
+            border-left: 3px solid #3b82f6;
+            color: #93c5fd; font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🛡️ AI Network Intrusion Detection System</h1>
+        <p>Real-time threat detection powered by Machine Learning & NLP</p>
+    </div>
+    <div style="text-align:right; color:#00ff88; font-size:13px;">
+        <div>🟢 System Online</div>
+        <div style="color:#888">Model Accuracy: 99.78%</div>
+    </div>
+</div>
+
+<div class="status-bar">
+    <div class="status-item">🧠 AI Model: <span>Random Forest</span></div>
+    <div class="status-item">📊 Dataset: <span>NSL-KDD</span></div>
+    <div class="status-item">🌐 Protocol Support: <span>TCP / UDP / ICMP</span></div>
+    <div class="status-item">⚡ Status: <span>Monitoring</span></div>
+</div>
+
+<div class="container">
+
+    <!-- Input Form -->
+    <div class="card">
+        <h2>🔍 Analyze Network Traffic</h2>
+        <div class="form-group">
+            <label>Protocol Type</label>
+            <select id="protocol">
+                <option value="tcp">TCP</option>
+                <option value="udp">UDP</option>
+                <option value="icmp">ICMP</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Service</label>
+            <select id="service">
+                <option value="http">HTTP</option>
+                <option value="ftp">FTP</option>
+                <option value="ssh">SSH</option>
+                <option value="smtp">SMTP</option>
+                <option value="dns">DNS</option>
+                <option value="telnet">Telnet</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Source Bytes</label>
+            <input type="number" id="src_bytes" value="1000" min="0"/>
+        </div>
+        <div class="form-group">
+            <label>Destination Bytes</label>
+            <input type="number" id="dst_bytes" value="5000" min="0"/>
+        </div>
+        <div class="form-group">
+            <label>Duration (seconds)</label>
+            <input type="number" id="duration" value="5" min="0"/>
+        </div>
+        <button class="btn btn-primary" onclick="analyzeTraffic()">
+            🔍 Analyze Traffic
+        </button>
+        <button class="btn btn-simulate" onclick="simulateIoT()">
+            📡 Simulate IoT Device
+        </button>
+    </div>
+
+    <!-- Alert Result -->
+    <div class="card">
+        <h2>⚠️ Detection Result</h2>
+        <div class="loading" id="loading">🔄 Analyzing traffic...</div>
+        <div class="alert-box" id="alertBox">
+            <div class="alert-title" id="alertStatus"></div>
+            <div style="margin-bottom:10px">
+                <span class="badge" id="alertSeverity"></span>
+                <span class="badge" id="alertConfidence"
+                    style="background:#374151;color:#fff"></span>
+            </div>
+            <div class="alert-detail" id="alertDetails"></div>
+            <div class="recommend-box" id="alertRecommend"></div>
+        </div>
+        <div id="placeholder" style="color:#555; text-align:center;
+            padding:40px; font-size:14px;">
+            Submit network data to see detection results
+        </div>
+    </div>
+
+    <!-- Alert History -->
+    <div class="card full-width">
+        <h2>📋 Recent Alert History</h2>
+        <div id="alertHistory">
+            <div style="color:#555; text-align:center; padding:20px;
+                font-size:14px;">
+                No alerts yet — analyze some traffic!
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    async function analyzeTraffic() {
+        const data = {
+            protocol_type: document.getElementById('protocol').value,
+            service: document.getElementById('service').value,
+            src_bytes: parseInt(document.getElementById('src_bytes').value),
+            dst_bytes: parseInt(document.getElementById('dst_bytes').value),
+            duration: parseInt(document.getElementById('duration').value),
+            flag: 'SF', count: 10, srv_count: 10,
+            dst_host_count: 50, dst_host_srv_count: 50
+        };
+        showLoading();
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const alert = await response.json();
+        displayAlert(alert);
+    }
+
+    async function simulateIoT() {
+        showLoading();
+        const response = await fetch('/simulate');
+        const alert = await response.json();
+        displayAlert(alert);
+    }
+
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('alertBox').style.display = 'none';
+        document.getElementById('placeholder').style.display = 'none';
+    }
+
+    function displayAlert(alert) {
+        document.getElementById('loading').style.display = 'none';
+        const box = document.getElementById('alertBox');
+        box.style.display = 'block';
+        const isAttack = alert.status.includes('THREAT');
+        box.className = 'alert-box ' +
+            (isAttack ? 'alert-threat' : 'alert-normal');
+        document.getElementById('alertStatus').textContent = alert.status;
+        document.getElementById('alertDetails').textContent = alert.details;
+        document.getElementById('alertRecommend').textContent =
+            '➡️ ' + alert.recommendation;
+        const sev = document.getElementById('alertSeverity');
+        sev.textContent = alert.severity;
+        sev.className = 'badge ' +
+            (isAttack ? 'badge-critical' : 'badge-normal');
+        document.getElementById('alertConfidence').textContent =
+            '🎯 Confidence: ' + alert.confidence;
+        updateHistory(alert);
+    }
+
+    function updateHistory(alert) {
+        const history = document.getElementById('alertHistory');
+        const isAttack = alert.status.includes('THREAT');
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+            <span>${alert.status}</span>
+            <span style="color:#aaa">${alert.type}</span>
+            <span class="badge ${isAttack ?
+                'badge-critical' : 'badge-normal'}">
+                ${alert.severity}</span>
+            <span style="color:#888;font-size:12px">
+                ${new Date().toLocaleTimeString()}</span>
+        `;
+        if (history.querySelector('div[style]')) history.innerHTML = '';
+        history.insertBefore(item, history.firstChild);
+    }
+</script>
+</body>
+</html>
