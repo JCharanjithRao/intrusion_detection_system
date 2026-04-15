@@ -1,8 +1,8 @@
+import os
 from flask import Flask, render_template, request, jsonify
 import pickle
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from nlp_alerts import generate_alert, format_alert_message
 import random
 
@@ -85,4 +85,5 @@ def simulate():
     return jsonify(alert)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
