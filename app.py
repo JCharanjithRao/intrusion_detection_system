@@ -2,8 +2,8 @@ import os
 from flask import Flask, render_template, request, jsonify
 import pickle
 import numpy as np
-import pandas as pd
-from nlp_alerts import generate_alert, format_alert_message
+from nlp_alerts import generate_alert
+from chatbot import chatbot_response
 import random
 
 app = Flask(__name__)
@@ -58,7 +58,6 @@ def analyze():
 
 @app.route('/simulate')
 def simulate():
-    """Simulates IoT device sending network traffic"""
     scenarios = [
         {'duration': 1, 'protocol_type': 'tcp', 'service': 'ftp',
          'flag': 'SF', 'src_bytes': 15000, 'dst_bytes': 200,
@@ -83,6 +82,13 @@ def simulate():
     if len(recent_alerts) > 10:
         recent_alerts.pop()
     return jsonify(alert)
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    message = data.get('message', '')
+    response = chatbot_response(message, recent_alerts)
+    return jsonify({'response': response})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
