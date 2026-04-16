@@ -1,4 +1,3 @@
- 
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
@@ -25,20 +24,27 @@ columns = [
 print("Loading dataset...")
 df = pd.read_csv('dataset/train_data.csv', names=columns)
 
-# Simplify labels - Normal vs Attack
-df['label'] = df['label'].apply(lambda x: 'normal' if x == 'normal' else 'attack')
+# 🔥 Convert labels → binary (IMPORTANT FIX)
+df['label'] = df['label'].apply(lambda x: 0 if x == 'normal' else 1)
 
 print(f"Dataset loaded! Total records: {len(df)}")
-print(f"Attack records: {len(df[df['label']=='attack'])}")
-print(f"Normal records: {len(df[df['label']=='normal'])}")
+print(f"Attack records: {len(df[df['label']==1])}")
+print(f"Normal records: {len(df[df['label']==0])}")
 
-# Encode categorical columns
-le = LabelEncoder()
-for col in ['protocol_type', 'service', 'flag']:
-    df[col] = le.fit_transform(df[col])
+# 🔥 ONLY KEEP REQUIRED FEATURES (BIG FIX)
+df = df[['src_bytes', 'dst_bytes', 'label']]
+
+# Rename for clarity (optional but clean)
+df.rename(columns={
+    'src_bytes': 'bytes_sent',
+    'dst_bytes': 'bytes_received'
+}, inplace=True)
+
+# Shuffle data
+df = df.sample(frac=1).reset_index(drop=True)
 
 # Features and labels
-X = df.drop(['label', 'difficulty'], axis=1)
+X = df[['bytes_sent', 'bytes_received']]
 y = df['label']
 
 # Split data
@@ -47,14 +53,22 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 print("\nTraining AI model...")
-model = RandomForestClassifier(n_estimators=100, random_state=42)
+
+# 🔥 Balanced model (VERY IMPORTANT FIX)
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42,
+    class_weight='balanced'
+)
+
 model.fit(X_train, y_train)
 
 # Test the model
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
+
 print(f"\nModel trained successfully!")
-print(f" Accuracy: {accuracy * 100:.2f}%")
+print(f"Accuracy: {accuracy * 100:.2f}%")
 print("\nDetailed Report:")
 print(classification_report(y_test, y_pred))
 
@@ -64,3 +78,6 @@ with open('model/intrusion_model.pkl', 'wb') as f:
     pickle.dump(model, f)
 
 print("Model saved to model/intrusion_model.pkl")
+
+# 🔥 DEBUG CHECK (IMPORTANT)
+print("Model expects features:", model.n_features_in_)
