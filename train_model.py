@@ -53,8 +53,8 @@ model.fit(X_train, y_train)
 # Test the model
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
-print(f"\n✅ Model trained successfully!")
-print(f"🎯 Accuracy: {accuracy * 100:.2f}%")
+print(f"\nModel trained successfully!")
+print(f" Accuracy: {accuracy * 100:.2f}%")
 print("\nDetailed Report:")
 print(classification_report(y_test, y_pred))
 
@@ -63,4 +63,4 @@ os.makedirs('model', exist_ok=True)
 with open('model/intrusion_model.pkl', 'wb') as f:
     pickle.dump(model, f)
 
-print("✅ Model saved to model/intrusion_model.pkl")
+print("Model saved to model/intrusion_model.pkl")
