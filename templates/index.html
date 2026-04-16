@@ -628,8 +628,12 @@
             <button class="btn btn-primary" onclick="analyzeTraffic()">
                 ⚡ Analyze Traffic
             </button>
-            <button class="btn btn-simulate" onclick="simulateIoT()">
-                📡 Simulate IoT Device
+            <button class="btn btn-outline" onclick="simulateIoT()">
+            📡 Simulate IoT Device
+            </button>
+            <button class="btn" onclick="liveCapture()"
+                style="background:#7c3aed;color:white;margin-top:8px">
+                🔴 Live Packet Capture
             </button>
         </div>
 
@@ -815,6 +819,45 @@
         wrapper.appendChild(bubble);
         messages.appendChild(wrapper);
         messages.scrollTop = messages.scrollHeight;
+    }
+        async function liveCapture() {
+        showScanning();
+        // Show special message
+        document.getElementById('scanning').innerHTML = `
+            <div class="scan-ring"></div>
+            <div style="font-size:13px;color:#7c3aed;font-weight:600;">
+                🔴 Capturing live packets (5 sec)...
+            </div>
+        `;
+        try {
+            const res  = await fetch('/live');
+            const data = await res.json();
+            if (!data.success) {
+                document.getElementById('scanning').style.display = 'none';
+                document.getElementById('placeholder').style.display = 'block';
+                document.getElementById('placeholder').innerHTML = `
+                    <div class="placeholder-icon">⚠️</div>
+                    <div style="color:#dc2626">${data.error}</div>
+                    <div style="font-size:11px;color:#9ca3af;margin-top:4px">
+                        Try running VS Code as Administrator
+                    </div>
+                `;
+                return;
+            }
+            const alert = data.alert;
+            alert.status = alert.status || (data.prediction === 'attack' ?
+                '🔴 THREAT DETECTED' : '🟢 NETWORK NORMAL');
+            displayResult(alert);
+
+            // Show live capture badge
+            document.getElementById('resultBadges').innerHTML +=
+                `<span class="badge" style="background:#f3e8ff;
+                color:#7c3aed;border:1px solid #d8b4fe;">
+                🔴 LIVE • ${data.features.total_packets} packets</span>`;
+
+        } catch(e) {
+            alert('Live capture failed: ' + e.message);
+        }
     }
 </script>
 </body>
